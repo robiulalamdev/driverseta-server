@@ -15,9 +15,9 @@ const moduleRoutes = [
     route: AuthRoutes,
   },
   {
-    path:'/tracking',
-    route: TrackingRoutes
-  }
+    path: '/tracking',
+    route: TrackingRoutes,
+  },
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));

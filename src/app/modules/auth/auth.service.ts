@@ -14,13 +14,13 @@ import {
 import { sendEmail } from './sendResetMail';
 
 const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
-  const { id, password } = payload;
+  const { phoneNumber, password } = payload;
   // creating instance of User
   // const user = new User();
   //  // access to our instance methods
   //   const isUserExist = await user.isUserExist(id);
 
-  const isUserExist = await User.isUserExist(id);
+  const isUserExist = await User.findOne({ phoneNumber: phoneNumber });
 
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
@@ -35,23 +35,84 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
 
   //create access token & refresh token
 
-  const { id: userId, role, needsPasswordChange } = isUserExist;
+  const result = isUserExist;
   const accessToken = jwtHelpers.createToken(
-    { userId, role },
+    {
+      _id: result?._id,
+      name: result?.name,
+      phoneNumber: result?.phoneNumber,
+      role: result?.role,
+    },
     config.jwt.secret as Secret,
     config.jwt.expires_in as string
   );
 
   const refreshToken = jwtHelpers.createToken(
-    { userId, role },
+    {
+      _id: result?._id,
+      name: result?.name,
+      phoneNumber: result?.phoneNumber,
+      role: result?.role,
+    },
     config.jwt.refresh_secret as Secret,
     config.jwt.refresh_expires_in as string
   );
 
   return {
+    user: result,
     accessToken,
     refreshToken,
-    needsPasswordChange,
+    needsPasswordChange: result?.needsPasswordChange,
+  };
+};
+
+const registerUser = async (payload: any): Promise<any> => {
+  const { phoneNumber, password, name, role } = payload;
+
+  const isUserExist = await User.findOne({ phoneNumber: phoneNumber }).select(
+    'phoneNumber'
+  );
+
+  if (isUserExist) {
+    throw new ApiError(httpStatus.FOUND, 'phone number already in use');
+  }
+
+  const newUser = new User({
+    phoneNumber: phoneNumber,
+    password: password,
+    name: name,
+    role: role,
+  });
+
+  const result = await newUser.save();
+
+  const accessToken = jwtHelpers.createToken(
+    {
+      _id: result?._id,
+      name: result?.name,
+      phoneNumber: result?.phoneNumber,
+      role: result?.role,
+    },
+    config.jwt.secret as Secret,
+    config.jwt.expires_in as string
+  );
+
+  const refreshToken = jwtHelpers.createToken(
+    {
+      _id: result?._id,
+      name: result?.name,
+      phoneNumber: result?.phoneNumber,
+      role: result?.role,
+    },
+    config.jwt.refresh_secret as Secret,
+    config.jwt.refresh_expires_in as string
+  );
+
+  return {
+    user: result,
+    accessToken,
+    refreshToken,
+    needsPasswordChange: result?.needsPasswordChange,
   };
 };
 
@@ -142,61 +203,72 @@ const changePassword = async (
 };
 
 const forgotPass = async (payload: { id: string }) => {
-
   const user = await User.findOne({ id: payload.id }, { id: 1, role: 1 });
 
   if (!user) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User does not exist!")
+    throw new ApiError(httpStatus.BAD_REQUEST, 'User does not exist!');
   }
 
   let profile = null;
- 
- 
 
   if (!profile) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Pofile not found!")
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Pofile not found!');
   }
 
- 
+  const passResetToken = await jwtHelpers.createResetToken(
+    { id: user.id },
+    config.jwt.secret as string,
+    '50m'
+  );
 
-  const passResetToken = await jwtHelpers.createResetToken({ id: user.id }, config.jwt.secret as string, '50m')
+  const resetLink: string = config.resetlink + `token=${passResetToken}`;
 
-  const resetLink: string = config.resetlink + `token=${passResetToken}`
-
-  console.log("profile: ", profile)
-  await sendEmail('nahid@gmail.com', `
+  console.log('profile: ', profile);
+  await sendEmail(
+    'nahid@gmail.com',
+    `
       <div>
         <p>Hi, </p>
         <p>Your password reset link: <a href=${resetLink}>Click Here</a></p>
         <p>Thank you</p>
       </div>
-  `);
+  `
+  );
 
   // return {
   //   message: "Check your email!"
   // }
-}
+};
 
-const resetPassword = async (payload: { id: string, newPassword: string }, token: string) => {
-
+const resetPassword = async (
+  payload: { id: string; newPassword: string },
+  token: string
+) => {
   const { id, newPassword } = payload;
-  const user = await User.findOne({ id }, { id: 1 })
+  const user = await User.findOne({ id }, { id: 1 });
 
   if (!user) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User not found!")
+    throw new ApiError(httpStatus.BAD_REQUEST, 'User not found!');
   }
 
-  const isVarified = await jwtHelpers.verifyToken(token, config.jwt.secret as string);
+  const isVarified = await jwtHelpers.verifyToken(
+    token,
+    config.jwt.secret as string
+  );
 
-  const password = await bcrypt.hash(newPassword, Number(config.bycrypt_salt_rounds))
+  const password = await bcrypt.hash(
+    newPassword,
+    Number(config.bycrypt_salt_rounds)
+  );
 
   await User.updateOne({ id }, { password });
-}
+};
 
 export const AuthService = {
   loginUser,
+  registerUser,
   refreshToken,
   changePassword,
   forgotPass,
-  resetPassword
+  resetPassword,
 };

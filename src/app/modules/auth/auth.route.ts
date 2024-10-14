@@ -13,6 +13,12 @@ router.post(
 );
 
 router.post(
+  '/register',
+  validateRequest(AuthValidation.registerZodSchema),
+  AuthController.createNewAccount
+);
+
+router.post(
   '/refresh-token',
   validateRequest(AuthValidation.refreshTokenZodSchema),
   AuthController.refreshToken
@@ -21,21 +27,12 @@ router.post(
 router.post(
   '/change-password',
   validateRequest(AuthValidation.changePasswordZodSchema),
-  auth(
-    ENUM_USER_ROLE.SUPER_ADMIN,
-    ENUM_USER_ROLE.ADMIN
-  ),
+  auth(ENUM_USER_ROLE.SUPER_ADMIN, ENUM_USER_ROLE.ADMIN),
   AuthController.changePassword
 );
 
-router.post(
-  '/forgot-password',
-  AuthController.forgotPass
-);
+router.post('/forgot-password', AuthController.forgotPass);
 
-router.post(
-  '/reset-password',
-  AuthController.resetPassword
-);
+router.post('/reset-password', AuthController.resetPassword);
 
 export const AuthRoutes = router;

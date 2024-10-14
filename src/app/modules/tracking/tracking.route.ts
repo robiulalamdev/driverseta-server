@@ -2,11 +2,10 @@ import express from 'express';
 import { TrackingController } from './tracking.controller';
 const router = express.Router();
 
-
 /**
  * @swagger
  * /tracking/init:
- *   get: 
+ *   get:
  *     summary: Get all users
  *     description: Retrieve a list of users.
  *     responses:
@@ -25,14 +24,13 @@ const router = express.Router();
  *                     type: string
  */
 
+router.get('/init', TrackingController.init);
+
+router.post('create', TrackingController.create);
 router.get(
-  '/init',
-  TrackingController.init
+  '/deriver/:phoneNumber',
+  TrackingController.getTrackingDataForDriver
 );
-
-router.post("create",
-  TrackingController.create
-)
-
+router.get('/:id', TrackingController.getTrackingById);
 
 export const TrackingRoutes = router;

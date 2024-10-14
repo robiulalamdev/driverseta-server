@@ -47,59 +47,85 @@ import { Tracking } from './tracking.model';
 //   }
 // );
 
-const init : RequestHandler = catchAsync(
-  async (req: Request, res: Response) => {
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Tracking Route Created!',
-      data: "There is no data",
-    })
-  }
-)
-
-const create: RequestHandler = catchAsync(async (req: Request, res: Response) => {
-
-  const body = req.body;
-  console.log(body);
-
-  try {
-    const result = await Tracking.create(body);
-    sendResponse(res, {
-      statusCode: httpStatus.OK,
-      success: true,
-      message: 'Tracking Route Created!',
-      data: result,
-    });
-  } catch (error: unknown) {
-    console.error('Error in POST /tracking:', error);
-    let errorMessage = 'An unexpected error occurred';
-
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    sendResponse(res, {
-      statusCode: httpStatus.INTERNAL_SERVER_ERROR,
-      success: false,
-      message: 'An unexpected error occurred',
-      data: errorMessage, // Or handle error object as needed
-    });
-  }
+const init: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Tracking Route Created!',
+    data: 'There is no data',
+  });
 });
 
+const create: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {
+    const body = req.body;
+    console.log(body);
 
+    try {
+      const result = await Tracking.create(body);
+      sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Tracking Route Created!',
+        data: result,
+      });
+    } catch (error: unknown) {
+      console.error('Error in POST /tracking:', error);
+      let errorMessage = 'An unexpected error occurred';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      sendResponse(res, {
+        statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: 'An unexpected error occurred',
+        data: errorMessage, // Or handle error object as needed
+      });
+    }
+  }
+);
+
+const getTrackingDataForDriver = catchAsync(
+  async (req: Request, res: Response) => {
+    try {
+      const result = await Tracking.find({
+        driverPhone: req.params?.phoneNumber,
+      }).sort({ _id: -1 });
+
+      sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: result,
+      });
+    } catch (error: unknown) {
+      console.error('Error in GET /tracking:', error);
+
+      let errorMessage = 'An unexpected error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      sendResponse(res, {
+        statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: errorMessage,
+      });
+    }
+  }
+);
 
 const getTrackingData = catchAsync(async (req: Request, res: Response) => {
   try {
-    const result = await Tracking.find({}, "", { sort: "-_id" });
-    
+    const result = await Tracking.find({}, '', { sort: '-_id' });
+
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
       data: result,
     });
   } catch (error: unknown) {
-    console.error("Error in GET /tracking:", error);
+    console.error('Error in GET /tracking:', error);
 
     let errorMessage = 'An unexpected error occurred';
     if (error instanceof Error) {
@@ -113,7 +139,6 @@ const getTrackingData = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
-
 
 const getTrackingById = catchAsync(async (req: Request, res: Response) => {
   try {
@@ -149,7 +174,6 @@ const getTrackingById = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
-
 
 const updateTracking = catchAsync(async (req: Request, res: Response) => {
   try {
@@ -190,12 +214,11 @@ const updateTracking = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
-
-
 export const TrackingController = {
   init,
   create,
   getTrackingData,
+  getTrackingDataForDriver,
   getTrackingById,
-  updateTracking
+  updateTracking,
 };

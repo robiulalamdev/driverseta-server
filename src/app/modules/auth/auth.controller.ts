@@ -7,8 +7,28 @@ import { AuthService } from './auth.service';
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
   const { ...loginData } = req.body;
-  console.log("loginData", loginData)
   const result = await AuthService.loginUser(loginData);
+  const { refreshToken } = result;
+  // set refresh token into cookie
+  const cookieOptions = {
+    secure: config.env === 'production',
+    httpOnly: true,
+  };
+
+  res.cookie('refreshToken', refreshToken, cookieOptions);
+
+  sendResponse<ILoginUserResponse>(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User logged in successfully !',
+    data: result,
+  });
+});
+
+const createNewAccount = catchAsync(async (req: Request, res: Response) => {
+  const { ...newUserData } = req.body;
+
+  const result = await AuthService.registerUser(newUserData);
   const { refreshToken } = result;
   // set refresh token into cookie
   const cookieOptions = {
@@ -61,32 +81,31 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const forgotPass = catchAsync(async (req: Request, res: Response) => {
-
   await AuthService.forgotPass(req.body);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Check your email!",
+    message: 'Check your email!',
   });
 });
 
 const resetPassword = catchAsync(async (req: Request, res: Response) => {
-
-  const token = req.headers.authorization || "";
+  const token = req.headers.authorization || '';
   await AuthService.resetPassword(req.body, token);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Account recovered!",
+    message: 'Account recovered!',
   });
 });
 
 export const AuthController = {
   loginUser,
+  createNewAccount,
   refreshToken,
   changePassword,
   forgotPass,
-  resetPassword
+  resetPassword,
 };

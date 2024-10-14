@@ -1,0 +1,62 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020, // You can upgrade to 2020 or 2021 for modern JavaScript features
+    "sourceType": "module",
+    "project": "./tsconfig.json", // To enable type-aware linting
+    "tsconfigRootDir": "./"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "prettier",
+    "import",
+    "security"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking", // Enforce type-checking rules
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
+    "plugin:security/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "no-unused-vars": "error",
+    "prefer-const": "error",
+    "no-unused-expressions": "error",
+    "no-undef": "error",
+    "no-console": "warn", // Keep it off during development, but warn in production
+    "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    "@typescript-eslint/explicit-module-boundary-types": "off", // Enable this for strict type-checking
+    "@typescript-eslint/no-floating-promises": "error", // Catch unhandled promises
+    "@typescript-eslint/no-misused-promises": "error", // Ensure promises are handled correctly
+    "@typescript-eslint/strict-boolean-expressions": "warn", // Avoid ambiguous truthy/falsy values
+    "prettier/prettier": "error", // Make Prettier errors visible in ESLint
+    "import/order": [
+      "error",
+      {
+        "groups": ["builtin", "external", "internal"],
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
+      }
+    ],
+    "import/newline-after-import": "error", // Enforce newline after import statements
+    "security/detect-object-injection": "warn" // Warn against object injection attacks
+  },
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
+  "globals": {
+    "process": "readonly"
+  }
+}

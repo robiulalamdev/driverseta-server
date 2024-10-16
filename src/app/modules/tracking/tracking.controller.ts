@@ -116,6 +116,36 @@ const getRequestTrackingsForDriver = catchAsync(
   }
 );
 
+const getDeliveredTrackingsForDriver = catchAsync(
+  async (req: Request, res: Response) => {
+    try {
+      const result = await Tracking.find({
+        driverPhone: req.params?.phoneNumber,
+        loadStatus: 'delivered',
+      }).sort({ _id: -1 });
+
+      sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: result,
+      });
+    } catch (error: unknown) {
+      console.error('Error in GET /tracking:', error);
+
+      let errorMessage = 'An unexpected error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      sendResponse(res, {
+        statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: errorMessage,
+      });
+    }
+  }
+);
+
 const getTrackingData = catchAsync(async (req: Request, res: Response) => {
   try {
     const result = await Tracking.find({}, '', { sort: '-_id' });
@@ -268,4 +298,5 @@ export const TrackingController = {
   getTrackingById,
   updateTracking,
   updateTrackingKnowLocation,
+  getDeliveredTrackingsForDriver,
 };

@@ -31,6 +31,10 @@ router.get(
   '/deriver/request/:phoneNumber',
   TrackingController.getRequestTrackingsForDriver
 );
+router.get(
+  '/deriver/history/:phoneNumber',
+  TrackingController.getDeliveredTrackingsForDriver
+);
 router.get('/:id', TrackingController.getTrackingById);
 router.patch(
   '/last-location/:id',

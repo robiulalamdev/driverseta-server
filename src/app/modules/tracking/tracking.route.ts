@@ -28,9 +28,14 @@ router.get('/init', TrackingController.init);
 
 router.post('create', TrackingController.create);
 router.get(
-  '/deriver/:phoneNumber',
-  TrackingController.getTrackingDataForDriver
+  '/deriver/request/:phoneNumber',
+  TrackingController.getRequestTrackingsForDriver
 );
 router.get('/:id', TrackingController.getTrackingById);
+router.patch(
+  '/last-location/:id',
+  TrackingController.updateTrackingKnowLocation
+);
+router.patch('/:id', TrackingController.updateTracking);
 
 export const TrackingRoutes = router;

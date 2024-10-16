@@ -86,11 +86,12 @@ const create: RequestHandler = catchAsync(
   }
 );
 
-const getTrackingDataForDriver = catchAsync(
+const getRequestTrackingsForDriver = catchAsync(
   async (req: Request, res: Response) => {
     try {
       const result = await Tracking.find({
         driverPhone: req.params?.phoneNumber,
+        loadStatus: { $ne: 'delivered' },
       }).sort({ _id: -1 });
 
       sendResponse(res, {
@@ -214,11 +215,57 @@ const updateTracking = catchAsync(async (req: Request, res: Response) => {
   }
 });
 
+const updateTrackingKnowLocation = catchAsync(
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const result = await Tracking.updateOne(
+        { _id: id },
+        {
+          $push: {
+            knownLocations: req.body,
+          },
+        },
+        {
+          new: true,
+        }
+      );
+
+      if (!result) {
+        return sendResponse(res, {
+          statusCode: httpStatus.NOT_FOUND,
+          success: false,
+          message: 'Tracking data not found',
+        });
+      }
+
+      sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        data: result,
+      });
+    } catch (error: unknown) {
+      let errorMessage = 'An unexpected error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      sendResponse(res, {
+        statusCode: httpStatus.INTERNAL_SERVER_ERROR,
+        success: false,
+        message: errorMessage,
+      });
+    }
+  }
+);
+
 export const TrackingController = {
   init,
   create,
   getTrackingData,
-  getTrackingDataForDriver,
+  getRequestTrackingsForDriver,
   getTrackingById,
   updateTracking,
+  updateTrackingKnowLocation,
 };

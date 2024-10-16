@@ -1,8 +1,7 @@
 /* eslint-disable no-unused-vars */
 
-import { DateValue, Time } from "@internationalized/date";
-import { ObjectId } from "mongoose";
-
+import { DateValue, Time } from '@internationalized/date';
+import { ObjectId } from 'mongoose';
 
 export type ITracking = {
   loadId: ObjectId;
@@ -11,35 +10,37 @@ export type ITracking = {
   driverPhone: string;
   carrierName: string;
   carrierPhone: string;
-  notificationEmail:string;
-  notificationPhone:string;
-  note:string;
-  locations:[
+  notificationEmail: string;
+  notificationPhone: string;
+  note: string;
+  locations: [
     {
-      id:number;
-      location:{
-        type:string;
-        formatted:string;
-        coordicates:number[];
-      },
-      isCompleted:boolean;
-      actualDate:DateValue;
+      id: number;
+      location: {
+        type: string;
+        formatted: string;
+        coordicates: number[];
+      };
+      isCompleted: boolean;
+      actualDate: DateValue;
       actualTime: Time;
-      startDate:DateValue;
+      startDate: DateValue;
       startTime: Time;
-      endDate:DateValue;
+      endDate: DateValue;
       endTime: Time;
-    },
-  ],
-  status:string;
+    }
+  ];
+  knownLocations?: [object];
+  isActive?: boolean;
+  type: string;
+  status: string;
   isPublished: boolean;
   isArchived: boolean;
 };
-
 
 // export type TrackingModel = {
 //   isUserExist(
 //     id: string
 //   ): Promise<ITracking>;
-  
+
 // } & Model<ITracking>;

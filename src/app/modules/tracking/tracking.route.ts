@@ -41,5 +41,6 @@ router.patch(
   TrackingController.updateTrackingKnowLocation
 );
 router.patch('/:id', TrackingController.updateTracking);
+router.patch('/update-info/:id', TrackingController.updateTrackingById);
 
 export const TrackingRoutes = router;

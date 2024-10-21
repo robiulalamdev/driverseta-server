@@ -20,16 +20,16 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
   //  // access to our instance methods
   //   const isUserExist = await user.isUserExist(id);
 
-  const isUserExist = await User.findOne({ phoneNumber: phoneNumber });
+  const isUserExist = await User.findOne({ phoneNumber: phoneNumber }).select(
+    '+password'
+  );
 
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
   }
 
-  if (
-    isUserExist.password &&
-    !(await User.isPasswordMatched(password, isUserExist.password))
-  ) {
+  const isMatched = await bcrypt.compare(password, isUserExist.password);
+  if (!isMatched) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Password is incorrect');
   }
 

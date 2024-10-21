@@ -27,6 +27,7 @@ const router = express.Router();
 router.get('/init', TrackingController.init);
 
 router.post('create', TrackingController.create);
+router.get('/deriver/:phoneNumber', TrackingController.getDriversTrackings);
 router.get(
   '/deriver/request/:phoneNumber',
   TrackingController.getRequestTrackingsForDriver
